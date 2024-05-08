@@ -20,6 +20,10 @@ export default class Game extends Phaser.Scene {
    
     //import ninja
     this.load.image("ninja","../public/assets/Ninja.png");
+    //recolectables
+    this.load.image("roca","../public/assets/roca1.webp");
+    this.load.image("araña","../public/assets/araña1.png");
+
   }
 
   create() {
@@ -47,9 +51,31 @@ export default class Game extends Phaser.Scene {
      //letra por letra
      //this.cursor = this.input.keyboard.addkey()
 
+     //
+     this.recolectables = this.physics.add.group();
+     this.physics.add.collider(this.ninja, this.recolectables);
 
+     //evento 1 segundo
+     this.time.addEvent({
+      delay: 1000,
+      callback: this.onSecond,
+      callbackScope: this,
+      loop: true,
+     });
   }
  
+ onSecond(){
+  //creo recolectable
+  const tipos = ["araña", "roca"];
+  const tipo = Phaser.Math.RND.pick(tipos); 
+  console.log(tipo)
+  let recolectable = this.recolectables.create(
+    Phaser.Math.Between(10, 790),
+    0,
+    tipo
+  ).setScale(0.2 )
+
+ }
 
   update() {
 //movimiento personaje
@@ -60,7 +86,7 @@ export default class Game extends Phaser.Scene {
     }else{
       this.ninja.setVelocityX(0);
     }
-    if (this.cursor.up.isDown && this.ninja.body.tounching.down){
+    if (this.cursor.up.isDown && this.ninja.body.touching.down){
       this.ninja.setVelocityY(-330);
     }
   }
