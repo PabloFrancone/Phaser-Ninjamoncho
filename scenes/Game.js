@@ -1,16 +1,15 @@
-// URL to explain PHASER scene: https://rexrainbow.github.io/phaser3-rex-notes/docs/site/scene/
-
+// URL to explain PHASER scene: https://rexrainbow.github.io/phaser3-rex-notes/docs/site/scene/ ... https://phaser.io/tutorials/making-your-first-phaser-3-game-spanish/part9
 export default class Game extends Phaser.Scene {
   constructor() {
     super("main");
   }
 
-  init() {
+  init() { 
    
   }
 
   preload() {
-    //cargar assets
+    ///cargar assets
   
     //import cielo
     this.load.image("cielo","../public/assets/Cielo.webp");
@@ -20,6 +19,7 @@ export default class Game extends Phaser.Scene {
    
     //import ninja
     this.load.image("ninja","../public/assets/Ninja.png");
+
     //recolectables
     this.load.image("roca","../public/assets/roca1.webp");
     this.load.image("araña","../public/assets/araña1.png");
@@ -29,8 +29,8 @@ export default class Game extends Phaser.Scene {
   create() {
     // crear elementos
 
-    this.Cielo = this.add.image(400,300,"cielo");
-    this.Cielo.setScale(2);
+    this.cielo = this.add.image(400,300,"cielo");
+    this.cielo.setScale(2);
 
     this.plataformas = this.physics.add.staticGroup();
     this.plataformas.create(400, 568, "plataforma").setScale(2).refreshBody();
@@ -62,6 +62,18 @@ export default class Game extends Phaser.Scene {
       callbackScope: this,
       loop: true,
      });
+
+     stars = this.physics.add.group({
+      key: 'star',
+      repeat: 11,
+      setXY: { x: 12, y: 0, stepX: 70 }
+  });
+  
+  stars.children.iterate(function (child) {
+  
+      child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+  
+  });
   }
  
  onSecond(){
