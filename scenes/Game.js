@@ -24,14 +24,14 @@ export default class Game extends Phaser.Scene {
     this.load.image("roca","../public/assets/roca1.webp");
     this.load.image("araña","../public/assets/araña1.png");
     this.load.image("meteoro","../public/assets/meteoro 2.webp");
-
+    this.load.image("bomb","../public/assets/bomba 3.png");
   }
 
 
 
     create() {
       // Create elements
-      this.sky = this.add.image(400, 300, "sky");
+      this.sky = this.add.image(400, 300, "cielo");
       this.sky.setScale(2);
       // Create platforms group
       this.platforms = this.physics.add.staticGroup();
@@ -40,7 +40,7 @@ export default class Game extends Phaser.Scene {
       // Add another platform at a different position
       this.platforms.create(200, 400, "plataforma" );
       // Create character
-      this.character = this.physics.add.sprite(400, 300, "character");
+      this.character = this.physics.add.sprite(400, 300, "ninja");
       this.character.setScale(0.1);
       this.character.setCollideWorldBounds(true);
       // Add collision between character and platform
