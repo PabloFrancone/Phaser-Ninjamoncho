@@ -30,10 +30,10 @@ export default class Game extends Phaser.Scene {
     this.load.image("ninja","./public/assets/Ninja.png");
 
     //recolectables
-    this.load.image("roca","./public/assets/roca1.webp");
+    this.load.image("roca","./public/assets/roca 2.1.png");
     this.load.image("araña","./public/assets/araña1.png");
     this.load.image("meteoro","./public/assets/meteoro 2.webp");
-    this.load.image("bomb","./public/assets/bomba 3.png");
+    this.load.image("bomb","./public/assets/bomba 3.3.png");
   }
 
 
@@ -138,7 +138,7 @@ export default class Game extends Phaser.Scene {
         Phaser.Math.Between(10, 790),
         0,
         type
-      );
+      ).setScale (0.3)
       collectible.setVelocity(0, 100);
       // Set bounce: find a number between 0.4 and 0.8
       const bounce = Phaser.Math.FloatBetween(0.4, 0.8);
