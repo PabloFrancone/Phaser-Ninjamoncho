@@ -1,5 +1,5 @@
-// URL to explain PHASER scene: https://rexrainbow.github.io/phaser3-rex-notes/docs/site/scene/ ... https://phaser.io/tutorials/making-your-first-phaser-3-game-spanish/part9
-export default class Game extends Phaser.Scene {
+// URL to explain PHASER scene: https://rexrainbow.github.io/phaser3-rex-notes/docs/site/scene/ 
+export default class Game extends Phaser.Scene { 
   constructor() {
     super("main");
   }
@@ -23,83 +23,174 @@ export default class Game extends Phaser.Scene {
     //recolectables
     this.load.image("roca","../public/assets/roca1.webp");
     this.load.image("araña","../public/assets/araña1.png");
+    this.load.image("meteoro","../public/assets/meteoro 2.webp");
 
   }
 
-  create() {
-    // crear elementos
-
-    this.cielo = this.add.image(400,300,"cielo");
-    this.cielo.setScale(2);
-
-    this.plataformas = this.physics.add.staticGroup();
-    this.plataformas.create(400, 568, "plataforma").setScale(2).refreshBody();
-    this.plataformas.create(200, 200, "plataforma")
 
 
-    this.ninja = this.physics.add.sprite(400,300,"ninja");
-    this.ninja.setScale(0.1);
-    this.ninja.setCollideWorldBounds(true);
-
-    //agrupar colision entre personaje y plataforma
-
-     this.physics.add.collider(this.ninja, this.plataformas);
-
-     //crear teclas 
-     this.cursor = this.input.keyboard.createCursorKeys();
-
-     //letra por letra
-     //this.cursor = this.input.keyboard.addkey()
-
-     //
-     this.recolectables = this.physics.add.group();
-     this.physics.add.collider(this.ninja, this.recolectables);
-
-     //evento 1 segundo
-     this.time.addEvent({
-      delay: 1000,
-      callback: this.onSecond,
-      callbackScope: this,
-      loop: true,
-     });
-
-     stars = this.physics.add.group({
-      key: 'star',
-      repeat: 11,
-      setXY: { x: 12, y: 0, stepX: 70 }
-  });
-  
-  stars.children.iterate(function (child) {
-  
-      child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-  
-  });
-  }
- 
- onSecond(){
-  //creo recolectable
-  const tipos = ["araña", "roca"];
-  const tipo = Phaser.Math.RND.pick(tipos); 
-  console.log(tipo)
-  let recolectable = this.recolectables.create(
-    Phaser.Math.Between(10, 790),
-    0,
-    tipo
-  ).setScale(0.2 )
-
- }
-
-  update() {
-//movimiento personaje
-    if(this.cursor.left.isDown){
-      this.ninja.setVelocityX(-160);
-    }else if(this.cursor.right.isDown){
-      this.ninja.setVelocityX(160);
-    }else{
-      this.ninja.setVelocityX(0);
+    create() {
+      // Create elements
+      this.sky = this.add.image(400, 300, "sky");
+      this.sky.setScale(2);
+      // Create platforms group
+      this.platforms = this.physics.add.staticGroup();
+      // Add a platform to the group
+      this.platforms.create(400, 568,"plataforma").setScale(2).refreshBody();
+      // Add another platform at a different position
+      this.platforms.create(200, 400, "plataforma" );
+      // Create character
+      this.character = this.physics.add.sprite(400, 300, "character");
+      this.character.setScale(0.1);
+      this.character.setCollideWorldBounds(true);
+      // Add collision between character and platform
+      this.physics.add.collider(this.character, this.platforms);
+      // Create cursor keys
+      this.cursors = this.input.keyboard.createCursorKeys();
+      // Create collectibles group
+      this.collectibles = this.physics.add.group();
+      // 1-second event
+      this.time.addEvent({
+        delay: 1000,
+        callback: this.onSecond,
+        callbackScope: this,
+        loop: true,
+      });
+      // Add 'R' key
+      this.rKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+      // 1-second event for timer
+      this.time.addEvent({
+        delay: 1000,
+        callback: this.handleTimer,
+        callbackScope: this,
+        loop: true,
+      });
+      // Add timer text in the top-right corner
+      this.timerText = this.add.text(10, 10, `Time left: ${this.timer}`, {
+        fontSize: "32px",
+        fill: "#fff",
+      });
+      this.scoreText = this.add.text(
+        10,
+        50,
+        `Score: ${this.score}
+          T: ${this.shapes["roca"].count}
+          S: ${this.shapes["araña"].count}
+          D: ${this.shapes["meteoro"].count}`
+      );
+      // Add collider between collectibles and character
+      this.physics.add.collider(
+        this.character,
+        this.collectibles,
+        this.onShapeCollect,
+        null,
+        this
+      );
+      // Add collider between collectibles and platforms
+      this.physics.add.collider(
+        this.collectibles,
+        this.platforms,
+        this.onCollectibleBounced,
+        null,
+        this
+      );
     }
-    if (this.cursor.up.isDown && this.ninja.body.touching.down){
-      this.ninja.setVelocityY(-330);
+  
+    update() {
+      if (this.gameOver && this.rKey.isDown) {
+        this.scene.restart();
+      }
+      if (this.gameOver) {
+        this.physics.pause();
+        this.timerText.setText("Game Over");
+        return;
+      }
+      // Character movement
+      if (this.cursors.left.isDown) {
+        this.character.setVelocityX(-160);
+      } else if (this.cursors.right.isDown) {
+        this.character.setVelocityX(160);
+      } else {
+        this.character.setVelocityX(0);
+      }
+      if (this.cursors.up.isDown && this.character.body.touching.down) {
+        this.character.setVelocityY(-330);
+      }
+    }
+  
+    onSecond() {
+      if (this.gameOver) {
+        return;
+      }
+      // Create collectible
+      const types = ["roca", "araña", "meteoro", "bomb"];
+      const type = Phaser.Math.RND.pick(types);
+      let collectible = this.collectibles.create(
+        Phaser.Math.Between(10, 790),
+        0,
+        type
+      );
+      collectible.setVelocity(0, 100);
+      // Set bounce: find a number between 0.4 and 0.8
+      const bounce = Phaser.Math.FloatBetween(0.4, 0.8);
+      collectible.setBounce(bounce);
+      // Set data
+      collectible.setData("points", this.shapes[type].points);
+      collectible.setData("type", type);
+    }
+  
+    onShapeCollect(character, collectible) {
+      const typeName = collectible.getData("type");
+      const points = collectible.getData("points");
+      this.score += points;
+      this.shapes[typeName].count += 1;
+      console.table(this.shapes);
+      console.log("Collected ", collectible.texture.key, points);
+      console.log("Score ", this.score);
+      collectible.destroy();
+      this.scoreText.setText(
+        `Score: ${this.score}
+          T: ${this.shapes["roca"].count}
+          S: ${this.shapes["araña"].count}
+          D: ${this.shapes["meteoro"].count}`
+      );
+      this.checkWin();
+    }
+  
+    checkWin() {
+      const meetsPoints = this.score >= 100;
+      const meetsShapes =
+        this.shapes["roca"].count >= 2 &&
+        this.shapes["araña"].count >= 2 &&
+        this.shapes["meteoro"].count >= 2;
+      if (meetsPoints && meetsShapes) {
+        console.log("You won");
+        this.scene.start("end", {
+          score: this.score,
+          gameOver: this.gameOver,
+        });
+      }
+    }
+  
+    handleTimer() {
+      this.timer -= 1;
+      this.timerText.setText(`Time left: ${this.timer}`);
+      if (this.timer === 0) {
+        this.gameOver = true;
+        this.scene.start("end", {
+          score: this.score,
+          gameOver: this.gameOver,
+        });
+      }
+    }
+  
+    onCollectibleBounced(collectible, platform) {
+      console.log("Collectible bounced");
+      let points = collectible.getData("points");
+      points -= 5;
+      collectible.setData("points", points);
+      if (points <= 0) {
+        collectible.destroy();
+      }
     }
   }
-}
