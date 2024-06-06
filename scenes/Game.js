@@ -9,9 +9,9 @@ export default class Game extends Phaser.Scene {
     this.timer = 30;
     this.score = 0;
     this.shapes = {
-      triangle: { points: 10, count: 0 },
-      square: { points: 20, count: 0 },
-      diamond: { points: 30, count: 0 },
+      roca: { points: 10, count: 0 },
+      araña: { points: 20, count: 0 },
+      meteoro: { points: 30, count: 0 },
       bomb: { points: -10, count: 0 },
     };
    
